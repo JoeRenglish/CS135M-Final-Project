@@ -1,15 +1,11 @@
 import { Text, View, StyleSheet, StatusBar, Pressable, FlatList } from "react-native";
 import { useState, useContext, useEffect } from "react";
-import { goals } from "@/data/goalsData";
-import { user } from "@/data/userData";
-import { rewards } from "@/data/rewardsData";
+import { goalData } from "@/data/goalsData";
+import { userData } from "@/data/userData";
+import { rewardData } from "@/data/rewardsData";
 
-export default function Index() {
-  
-
-
+export default function Goals() {
   return (
-    
     <View style={styles.container}>
       <StatusBar style={styles.statusbar}></StatusBar>
 
@@ -31,10 +27,8 @@ export default function Index() {
           <Text style={styles.experienceText}>0/1260 EXP</Text>
         </View>
       </View>
-
-      {/* ------------------ Main Content ------------------*/}
       <View>
-        <Text>This is the about screen.</Text>
+        <Text>This is the goals screen.</Text>
       </View>
 
 
