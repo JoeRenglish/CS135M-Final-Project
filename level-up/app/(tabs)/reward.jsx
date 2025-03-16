@@ -1,16 +1,128 @@
-import { Text, View, StyleSheet, StatusBar, Pressable, FlatList } from "react-native";
+import { Text, View, Button, StyleSheet, StatusBar, Pressable, FlatList, TextInput } from "react-native";
 import { useState, useContext, useEffect } from "react";
-import { goalData } from "@/data/goalsData";
-import { userData } from "@/data/userData";
-import { rewardData } from "@/data/rewardsData";
+import { useRouter, Link } from "expo-router";
+import { goals } from "@/data/goalsData";
+import { user } from "@/data/userData";
+import { rewards } from "@/data/rewardsData";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Rewards() {
+  const [userData, setUser] = useState([]);
+  const [level, setLevel] = useState();
+  const [experience, setExperience] = useState();
+  const [levelExperience, setLevelExperience] = useState();
+
+  const [rewardData, setRewards] = useState([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [levelRequired, setLevelRequired] = useState();
+
+  const router = useRouter();
+  
+  {/* ------------------ Get Reward Data From Async Storage ------------------ */}
+  useEffect(() => {
+    const fetchRewards = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("LevelUp");
+        const storageRewards = jsonValue != null ? JSON.parse(jsonValue) : null;
+        
+        if (storageRewards && storageRewards.length) {
+          setRewards(storageRewards.sort((a, b) => b.id - a.id));
+        } else {
+          setRewards(rewards.sort((a, b) => b.id - a.id));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchRewards();
+  }, [rewards]);
+
+{/* ------------------ Get User Data From Async Storage ------------------ */}
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("LevelUp");
+        const storageUsers = jsonValue != null ? JSON.parse(jsonValue) : null;
+        
+        if (storageUsers && storageUsers.length) {
+          setUser(storageUsers.sort((a, b) => b.id - a.id));
+        } else {
+          setUser(user.sort((a, b) => b.id - a.id));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    fetchUser();
+  }, [user]);
+
+  {/* ------------------ Store Goal Data in Async Storage ------------------ */}
+  useEffect(() => {
+    const storeReward = async () => {
+      try {
+        const jsonValue = JSON.stringify(rewardData);
+        await AsyncStorage.setItem("LevelUp", jsonValue);
+      } catch (e) {
+        console.error(e);
+      }
+    } 
+    storeReward();
+  }, [rewardData]);
+
+  useEffect(() => {
+    const storeUser = async () => {
+      try {
+        const jsonValue = JSON.stringify(userData);
+        await AsyncStorage.setItem("LevelUp", jsonValue);
+      } catch (e) {
+        console.error(e);
+      }
+    } 
+    storeUser();
+  }, [userData]);
+
+
+  
+  const addReward = () => {
+    if (title.trim() && description.trim()) {
+      const newId = rewardData.length > 0 ? rewardData[0].id + 1 : 1;
+      setRewards([{ id: newId, title: title, description: description, levelRequired: levelRequired }, ...rewardData]);
+      setTitle('');
+      setDescription('');
+      setLevelRequired();
+    }
+  }
+
+  
+
+  const removeReward = (id) => {
+    setRewards(rewardData.filter(reward => reward.id !== id));
+  }
+
+  const updateUser = (id) => {
+    setUser(userData.map(u => u.id === id ? {level: u.level, levelExperience: u.levelExperience, experience: u.experience } : u))
+  }
+
+
+
+  const renderItem = ({ item }) => (
+    <View style={{ borderColor: 'black', borderWidth: 1, height: 100, marginTop: 10, padding: 10}}>
+      <Text>{item.title}</Text>
+      <Text>{item.description}</Text>
+      <Text>{item.levelRequired}</Text>
+      <Pressable onPress={() => removeReward(item.id)}>
+        <Text>Delete</Text>
+      </Pressable>
+    </View>
+  )
+
   return (
     
     <View style={styles.container}>
       <StatusBar style={styles.statusbar}></StatusBar>
 
-      {/* ------------------ Level Bar ------------------*/}
+      {/* ------------------ Level Bar ------------------ */}
       <View style={styles.levelbar}>
         <View style={styles.levelIndicator}>
           <Text style={styles.levelText}>Level</Text>
@@ -29,16 +141,47 @@ export default function Rewards() {
         </View>
       </View>
 
-      {/* ------------------ Main Content ------------------*/}
-      <View>
-        <Text>This is the rewards screen.</Text>
+      {/* ------------------ Main Content ------------------ */}
+      
+      <View style={[styles.fixedView]}>
+        <Text style={{textAlign: 'center', fontWeight: 'bold'}}>Add a new Reward</Text>
+        <TextInput 
+          placeholder="Name your reward"
+          placeholderTextColor="gray"
+          value={title}
+          onChangeText={setTitle} 
+          style={styles.inputBox}/>
+        <TextInput 
+          placeholder="Describe your reward"
+          placeholderTextColor="gray"
+          value={description}
+          onChangeText={setDescription}
+          multiline={true}
+          numberOfLines={3}
+          style={[styles.inputBox, {height: 70}]}/>
+          <TextInput 
+          placeholder="Set your reward level goal"
+          placeholderTextColor="gray"
+          value={levelRequired}
+          onChangeText={setLevelRequired}
+          numberOfLines={1}
+          style={styles.inputBox }/>
+        <View style={{alignItems: 'center'}}>
+          <View style={{borderWidth: 1, borderRadius: 10, marginTop: 5, width: 150}}>
+            <Button title="Add Reward" onPress={addReward} />
+          </View>
+        </View>
       </View>
 
-
-
-
-
-
+      <View style={{height: 415, paddingLeft: 10, paddingRight: 10}}>
+        <FlatList
+          data={rewardData}
+          renderItem={renderItem}
+          keyExtractor={reward => reward.id}
+          contentContainerStyle={{ flexGrow: 1}} 
+        />
+      </View>
+      
     </View>
   );
 }
@@ -77,7 +220,7 @@ const styles = StyleSheet.create({
   barFill: {
     backgroundColor: '#2c2d3a',
     height: '100%',
-    width: '50%'
+    width: '0%'
   },
   goalText: {
     color: '#f1f1f1',
@@ -117,5 +260,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 24
+  },
+  inputBox: {
+    borderWidth: 1,
+    borderColor: "#aaa",
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 5,
+    textAlignVertical: "top",
+  },
+  fixedView: {
+    borderTopWidth: 1,
+    borderTopColor: 'gray',
+    width: '100%',
+    padding: 10
   }
-})
+});

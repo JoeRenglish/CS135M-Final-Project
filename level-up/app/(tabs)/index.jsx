@@ -1,15 +1,11 @@
 import { Text, View, StyleSheet, StatusBar, Pressable, FlatList } from "react-native";
 import { useState, useContext, useEffect } from "react";
-import { goals } from "@/data/goalsData";
-import { user } from "@/data/userData";
-import { rewards } from "@/data/rewardsData";
+import { goalData } from "@/data/goalsData";
+import { userData } from "@/data/userData";
+import { rewardData } from "@/data/rewardsData";
 
-export default function Index() {
-  
-
-
+export default function Goals() {
   return (
-    
     <View style={styles.container}>
       <StatusBar style={styles.statusbar}></StatusBar>
 
@@ -31,10 +27,19 @@ export default function Index() {
           <Text style={styles.experienceText}>0/1260 EXP</Text>
         </View>
       </View>
-
-      {/* ------------------ Main Content ------------------*/}
       <View>
-        <Text>This is the about screen.</Text>
+        <Text style={styles.textHeading}>How to Play</Text>
+        <Text style={styles.textBody}>
+          In this game, you gain experience by
+          completing daily goals. Every day you mark a goal as complete,
+          the amount of experience that goal gives you increases. Once you
+          gain enough experience, you will gain a level.
+
+        </Text>
+        <Text style={styles.textBody}>
+          You can create your own rewards for reaching certain levels 
+          on the rewards page. 
+        </Text>
       </View>
 
 
@@ -80,7 +85,7 @@ const styles = StyleSheet.create({
   barFill: {
     backgroundColor: '#2c2d3a',
     height: '100%',
-    width: '50%'
+    width: '0%'
   },
   goalText: {
     color: '#f1f1f1',
@@ -120,5 +125,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 24
+  },
+  textHeading: {
+    fontWeight: 'bold',
+    fontSize: 32,
+    padding: 10
+  },
+  textBody: {
+    fontSize: 16,
+    padding: 10
   }
 })
